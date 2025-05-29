@@ -1,38 +1,51 @@
-{
-  "name": "nextjs-google-sheets-database",
-  "version": "1.0.0",
-  "description": "Use Google Sheets as a Database",
-  "main": "index.js",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hshiferaw/nextjs-google-sheets-database.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/hshiferaw/nextjs-google-sheets-database/issues"
-  },
-  "homepage": "https://github.com/hshiferaw/nextjs-google-sheets-database#readme",
-  "dependencies": {
-    "google-spreadsheet": "^3.3.0",
-    "motion": "^10.14.2",
-    "next": "^12.3.1",
-    "react": "^17.0.2",
-    "react-dom": "17.0.2",
-    "react-rough-notation": "^1.0.5",
-    "googleapis": "^116.0.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/typography": "^0.5.7",
-    "autoprefixer": "^10.4.12",
-    "postcss": "^8.4.17",
-    "prop-types": "^15.8.1",
-    "tailwindcss": "^3.1.8"
+import { GoogleSpreadsheet } from "google-spreadsheet";
+
+const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
+const SHEET_NAME = "Inscrições";
+
+const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.status(405).json({ message: "Método não permitido" });
+    return;
+  }
+
+  const { nome, classe, ip } = req.body;
+
+  if (!nome || !classe || !ip) {
+    res.status(400).json({ message: "Campos incompletos" });
+    return;
+  }
+
+  try {
+    // Autenticação com conta de serviço
+    await doc.useServiceAccountAuth({
+      client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    });
+
+    // Carrega info da planilha
+    await doc.loadInfo();
+
+    // Seleciona a aba pelo nome
+    const sheet = doc.sheetsByTitle[SHEET_NAME];
+    if (!sheet) {
+      res.status(500).json({ message: "Planilha não encontrada" });
+      return;
+    }
+
+    // Adiciona uma nova linha com os dados
+    await sheet.addRow({
+      Nome: nome,
+      Classe: classe,
+      IP: ip,
+      Data: new Date().toLocaleString("pt-BR"),
+    });
+
+    res.status(200).json({ message: "Inscrição salva" });
+  } catch (error) {
+    console.error("Erro ao salvar inscrição:", error);
+    res.status(500).json({ message: "Erro interno" });
   }
 }
