@@ -1,11 +1,11 @@
 import { google } from "googleapis";
 
-const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
+const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SHEET_NAME = "Inscrições";
 
 const auth = new google.auth.GoogleAuth({
   credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
   },
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
@@ -37,9 +37,9 @@ export default async function handler(req, res) {
       },
     });
 
-    res.status(200).json({ message: "Inscrição salva" });
+    res.status(200).json({ message: "Inscrição salva com sucesso!" });
   } catch (error) {
     console.error("Erro ao salvar inscrição:", error);
-    res.status(500).json({ message: "Erro interno" });
+    res.status(500).json({ message: "Erro ao salvar inscrição" });
   }
 }
