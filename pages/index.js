@@ -5,21 +5,13 @@ export default function Home() {
   const [classe, setClasse] = useState("");
   const [ip, setIp] = useState("");
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // NOVO: controle de envio
 
   const classesOptions = [
-    "OFF TANK",
-    "ARCANO ELEVADO",
-    "ARCANO SILENCE",
-    "MAIN HEALER",
-    "RAIZ FERREA",
-    "QUEBRAREINOS",
-    "INCUBO",
-    "BRUXO",
-    "DPS - Frost",
-    "DPS - Fire",
-    "DPS - Aguia",
-    "DPS - Xbow"
-  ]; // Substitua pelas suas classes reais
+    "OFF TANK", "ARCANO ELEVADO", "ARCANO SILENCE", "MAIN HEALER",
+    "RAIZ FERREA", "QUEBRAREINOS", "INCUBO", "BRUXO",
+    "DPS - Frost", "DPS - Fire", "DPS - Aguia", "DPS - Xbow"
+  ];
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -28,6 +20,9 @@ export default function Home() {
       setMessage("Por favor, preencha todos os campos.");
       return;
     }
+
+    setIsSubmitting(true); // Desativa o botão e mostra mensagem
+    setMessage("Enviando...");
 
     try {
       const response = await fetch("/api/submit", {
@@ -46,6 +41,8 @@ export default function Home() {
       }
     } catch (error) {
       setMessage("Erro ao enviar inscrição.");
+    } finally {
+      setIsSubmitting(false); // Reativa o botão
     }
   }
 
@@ -77,6 +74,7 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
+              disabled={isSubmitting}
             />
           </label>
 
@@ -93,6 +91,7 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
+              disabled={isSubmitting}
             >
               <option value="">Selecione a classe</option>
               {classesOptions.map((c) => (
@@ -115,25 +114,27 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
+              disabled={isSubmitting}
             />
           </label>
 
           <button
             type="submit"
+            disabled={isSubmitting}
             style={{
               marginTop: "16px",
               width: "100%",
               padding: "10px",
-              backgroundColor: "#0070f3",
+              backgroundColor: isSubmitting ? "#aaa" : "#0070f3",
               color: "white",
               border: "none",
               borderRadius: "4px",
-              cursor: "pointer",
+              cursor: isSubmitting ? "not-allowed" : "pointer",
               fontWeight: "bold",
               fontSize: "16px"
             }}
           >
-            Enviar
+            {isSubmitting ? "Enviando..." : "Enviar"}
           </button>
         </form>
 
@@ -148,7 +149,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Rodapé com a frase desejada */}
       <footer style={{
         marginTop: "20px",
         textAlign: "center",
