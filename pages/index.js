@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Home() {
   const [nome, setNome] = useState("");
   const [classe, setClasse] = useState("");
   const [ip, setIp] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); // NOVO: controle de envio
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const classesOptions = [
     "OFF TANK", "ARCANO ELEVADO", "ARCANO SILENCE", "MAIN HEALER",
@@ -17,12 +18,11 @@ export default function Home() {
     e.preventDefault();
 
     if (!nome || !classe || !ip) {
-      setMessage("Por favor, preencha todos os campos.");
+      toast.warn("⚠️ Preencha todos os campos.");
       return;
     }
 
-    setIsSubmitting(true); // Desativa o botão e mostra mensagem
-    setMessage("Enviando...");
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/submit", {
@@ -32,17 +32,17 @@ export default function Home() {
       });
 
       if (response.ok) {
-        setMessage("Inscrição enviada com sucesso!");
+        toast.success("✅ Inscrição enviada com sucesso!");
         setNome("");
         setClasse("");
         setIp("");
       } else {
-        setMessage("Erro ao enviar inscrição.");
+        toast.error("❌ Erro ao enviar inscrição.");
       }
     } catch (error) {
-      setMessage("Erro ao enviar inscrição.");
+      toast.error("❌ Erro na conexão.");
     } finally {
-      setIsSubmitting(false); // Reativa o botão
+      setIsSubmitting(false);
     }
   }
 
@@ -66,6 +66,7 @@ export default function Home() {
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -74,7 +75,6 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
-              disabled={isSubmitting}
             />
           </label>
 
@@ -83,6 +83,7 @@ export default function Home() {
             <select
               value={classe}
               onChange={(e) => setClasse(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -91,7 +92,6 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
-              disabled={isSubmitting}
             >
               <option value="">Selecione a classe</option>
               {classesOptions.map((c) => (
@@ -106,6 +106,7 @@ export default function Home() {
               type="text"
               value={ip}
               onChange={(e) => setIp(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -114,7 +115,6 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
-              disabled={isSubmitting}
             />
           </label>
 
@@ -134,20 +134,12 @@ export default function Home() {
               fontSize: "16px"
             }}
           >
-            {isSubmitting ? "Enviando..." : "Enviar"}
+            {isSubmitting ? "🔄 Enviando..." : "Enviar"}
           </button>
         </form>
-
-        {message && (
-          <p style={{
-            marginTop: "20px",
-            textAlign: "center",
-            color: message.includes("sucesso") ? "green" : "red"
-          }}>
-            {message}
-          </p>
-        )}
       </div>
+
+      <ToastContainer position="top-center" autoClose={3000} />
 
       <footer style={{
         marginTop: "20px",
