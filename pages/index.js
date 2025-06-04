@@ -166,7 +166,7 @@ export default function Home() {
 
         {alreadySubmitted && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <p>Copie o comando abaixo e envie no chat do jogo:</p>
+            <p>Clique no botão abaixe e envie o comando no chat do jogo:</p>
             <button
               onClick={copyCommand}
               style={{
