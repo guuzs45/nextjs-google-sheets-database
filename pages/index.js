@@ -1,4 +1,126 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+function ClassDropdown({ options, value, onChange, disabled }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const images = {
+    "OFF TANK": "/icons/offtank.png",
+    "ARCANO ELEVADO": "/icons/arcano_elevado.png",
+    "ARCANO SILENCE": "/icons/arcano_silence.png",
+    "MAIN HEALER": "/icons/main_healer.png",
+    "RAIZ FERREA": "/icons/raiz_ferrea.png",
+    "QUEBRAREINOS": "/icons/quebrareinos.png",
+    "INCUBO": "/icons/incubo.png",
+    "BRUXO": "/icons/bruxo.png",
+    "DPS - Frost": "/icons/dps_frost.png",
+    "DPS - Fire": "/icons/dps_fire.png",
+    "DPS - Aguia": "/icons/dps_aguia.png",
+    "DPS - Xbow": "/icons/dps_xbow.png",
+  };
+
+  const selectedOption = options.find((opt) => opt === value);
+
+  return (
+    <div
+      ref={dropdownRef}
+      style={{
+        position: "relative",
+        userSelect: "none",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+        padding: "8px",
+        cursor: disabled ? "not-allowed" : "pointer",
+        backgroundColor: disabled ? "#eee" : "white",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        maxWidth: "250px",    // largura máxima para dropdown fechado
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis",
+      }}
+      onClick={() => {
+        if (!disabled) setIsOpen(!isOpen);
+      }}
+    >
+      {selectedOption ? (
+        <>
+          <img
+            src={images[selectedOption]}
+            alt={selectedOption}
+            style={{ width: 20, height: 20, objectFit: "contain" }}
+          />
+          <span>{selectedOption}</span>
+        </>
+      ) : (
+        <span style={{ color: "#888" }}>Selecione a classe</span>
+      )}
+
+      {isOpen && (
+        <ul
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            backgroundColor: "white",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            marginTop: 4,
+            maxHeight: 200,
+            overflowY: "auto",
+            zIndex: 1000,
+            listStyle: "none",
+            padding: 0,
+            maxWidth: "250px",  // largura máxima para o menu aberto
+          }}
+        >
+          {options.map((option) => (
+            <li
+              key={option}
+              onClick={() => {
+                onChange(option);
+                setIsOpen(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px",
+                cursor: "pointer",
+                backgroundColor: option === value ? "#0070f3" : "white",
+                color: option === value ? "white" : "black",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#eee")}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  option === value ? "#0070f3" : "white")
+              }
+            >
+              <img
+                src={images[option]}
+                alt={option}
+                style={{ width: 20, height: 20, objectFit: "contain" }}
+              />
+              {option}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function Home() {
   const [nome, setNome] = useState("");
@@ -9,20 +131,10 @@ export default function Home() {
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [copySuccess, setCopySuccess] = useState("");
 
-  // Lista das classes com caminho das imagens (coloque suas imagens em /public/icons)
   const classesOptions = [
-    { label: "OFF TANK", img: "/icons/offtank.png" },
-    { label: "ARCANO ELEVADO", img: "/icons/arcano_elevado.png" },
-    { label: "ARCANO SILENCE", img: "/icons/arcano_silence.png" },
-    { label: "MAIN HEALER", img: "/icons/main_healer.png" },
-    { label: "RAIZ FERREA", img: "/icons/raiz_ferrea.png" },
-    { label: "QUEBRAREINOS", img: "/icons/quebrareinos.png" },
-    { label: "INCUBO", img: "/icons/incubo.png" },
-    { label: "BRUXO", img: "/icons/bruxo.png" },
-    { label: "DPS - Frost", img: "/icons/dps_frost.png" },
-    { label: "DPS - Fire", img: "/icons/dps_fire.png" },
-    { label: "DPS - Aguia", img: "/icons/dps_aguia.png" },
-    { label: "DPS - Xbow", img: "/icons/dps_xbow.png" }
+    "OFF TANK", "ARCANO ELEVADO", "ARCANO SILENCE", "MAIN HEALER",
+    "RAIZ FERREA", "QUEBRAREINOS", "INCUBO", "BRUXO",
+    "DPS - Frost", "DPS - Fire", "DPS - Aguia", "DPS - Xbow"
   ];
 
   async function handleSubmit(e) {
@@ -70,130 +182,6 @@ export default function Home() {
       .catch(() => {
         setCopySuccess("❌ Falha ao copiar.");
       });
-  }
-
-  // Componente dropdown customizado com imagens
-  function ClassDropdown({ options, value, onChange, disabled }) {
-    const [open, setOpen] = useState(false);
-    const ref = useRef();
-
-    // Fecha dropdown ao clicar fora
-    useEffect(() => {
-      function handleClickOutside(event) {
-        if (ref.current && !ref.current.contains(event.target)) {
-          setOpen(false);
-        }
-      }
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
-
-    const selectedOption = options.find(opt => opt.label === value);
-
-    return (
-      <div
-        ref={ref}
-        tabIndex={0}
-        style={{
-          position: "relative",
-          userSelect: "none",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-          padding: "8px",
-          cursor: disabled ? "not-allowed" : "pointer",
-          backgroundColor: disabled ? "#eee" : "white",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px"
-        }}
-        onClick={() => !disabled && setOpen(o => !o)}
-        onKeyDown={e => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            !disabled && setOpen(o => !o);
-          }
-        }}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        {selectedOption ? (
-          <>
-            <img
-              src={selectedOption.img}
-              alt={selectedOption.label}
-              style={{ width: 24, height: 24, objectFit: "contain" }}
-            />
-            <span>{selectedOption.label}</span>
-          </>
-        ) : (
-          <span style={{ color: "#888" }}>Selecione a classe</span>
-        )}
-
-        <span style={{ marginLeft: "auto", fontWeight: "bold" }}>
-          ▼
-        </span>
-
-        {open && (
-          <ul
-            role="listbox"
-            tabIndex={-1}
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              right: 0,
-              backgroundColor: "white",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              marginTop: 4,
-              maxHeight: 200,
-              overflowY: "auto",
-              zIndex: 1000,
-              listStyle: "none",
-              padding: 0,
-            }}
-          >
-            {options.map(opt => (
-              <li
-                key={opt.label}
-                role="option"
-                aria-selected={value === opt.label}
-                onClick={() => {
-                  onChange(opt.label);
-                  setOpen(false);
-                }}
-                onKeyDown={e => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onChange(opt.label);
-                    setOpen(false);
-                  }
-                }}
-                tabIndex={0}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px",
-                  cursor: "pointer",
-                  backgroundColor: value === opt.label ? "#0070f3" : "white",
-                  color: value === opt.label ? "white" : "black"
-                }}
-              >
-                <img
-                  src={opt.img}
-                  alt={opt.label}
-                  style={{ width: 24, height: 24, objectFit: "contain" }}
-                />
-                <span>{opt.label}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
   }
 
   return (
