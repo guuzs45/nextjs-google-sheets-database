@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [nome, setNome] = useState("");
   const [classe, setClasse] = useState("");
   const [ip, setIp] = useState("");
+  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false); // flag para limitar envio
 
   const classesOptions = [
     "OFF TANK", "ARCANO ELEVADO", "ARCANO SILENCE", "MAIN HEALER",
@@ -14,15 +14,29 @@ export default function Home() {
     "DPS - Frost", "DPS - Fire", "DPS - Aguia", "DPS - Xbow"
   ];
 
+  // Verifica ao carregar se já enviou nesta sessão
+  useEffect(() => {
+    if (sessionStorage.getItem("formSubmitted") === "true") {
+      setAlreadySubmitted(true);
+      setMessage("Você já enviou o formulário nesta sessão.");
+    }
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
 
+    if (alreadySubmitted) {
+      setMessage("Você já enviou o formulário nesta sessão.");
+      return; // bloqueia novo envio
+    }
+
     if (!nome || !classe || !ip) {
-      toast.warn("⚠️ Preencha todos os campos.");
+      setMessage("Por favor, preencha todos os campos.");
       return;
     }
 
     setIsSubmitting(true);
+    setMessage("Enviando...");
 
     try {
       const response = await fetch("/api/submit", {
@@ -32,15 +46,17 @@ export default function Home() {
       });
 
       if (response.ok) {
-        toast.success("✅ Inscrição enviada com sucesso!");
+        setMessage("Inscrição enviada com sucesso!");
         setNome("");
         setClasse("");
         setIp("");
+        setAlreadySubmitted(true);
+        sessionStorage.setItem("formSubmitted", "true"); // marca como enviado
       } else {
-        toast.error("❌ Erro ao enviar inscrição.");
+        setMessage("Erro ao enviar inscrição.");
       }
     } catch (error) {
-      toast.error("❌ Erro na conexão.");
+      setMessage("Erro ao enviar inscrição.");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,7 +82,6 @@ export default function Home() {
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -75,6 +90,7 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
+              disabled={isSubmitting || alreadySubmitted} // bloqueia se já enviou
             />
           </label>
 
@@ -83,7 +99,6 @@ export default function Home() {
             <select
               value={classe}
               onChange={(e) => setClasse(e.target.value)}
-              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -92,6 +107,7 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
+              disabled={isSubmitting || alreadySubmitted}
             >
               <option value="">Selecione a classe</option>
               {classesOptions.map((c) => (
@@ -106,7 +122,6 @@ export default function Home() {
               type="text"
               value={ip}
               onChange={(e) => setIp(e.target.value)}
-              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -115,31 +130,40 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
+              disabled={isSubmitting || alreadySubmitted}
             />
           </label>
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || alreadySubmitted}
             style={{
               marginTop: "16px",
               width: "100%",
               padding: "10px",
-              backgroundColor: isSubmitting ? "#aaa" : "#0070f3",
+              backgroundColor: (isSubmitting || alreadySubmitted) ? "#aaa" : "#0070f3",
               color: "white",
               border: "none",
               borderRadius: "4px",
-              cursor: isSubmitting ? "not-allowed" : "pointer",
+              cursor: (isSubmitting || alreadySubmitted) ? "not-allowed" : "pointer",
               fontWeight: "bold",
               fontSize: "16px"
             }}
           >
-            {isSubmitting ? "🔄 Enviando..." : "Enviar"}
+            {alreadySubmitted ? "✅ Inscrição enviada" : (isSubmitting ? "Enviando..." : "Enviar")}
           </button>
         </form>
-      </div>
 
-      <ToastContainer position="top-center" autoClose={3000} />
+        {message && (
+          <p style={{
+            marginTop: "20px",
+            textAlign: "center",
+            color: message.includes("sucesso") ? "green" : "red"
+          }}>
+            {message}
+          </p>
+        )}
+      </div>
 
       <footer style={{
         marginTop: "20px",
