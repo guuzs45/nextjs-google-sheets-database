@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home() {
   const [nome, setNome] = useState("");
@@ -6,7 +6,8 @@ export default function Home() {
   const [ip, setIp] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [alreadySubmitted, setAlreadySubmitted] = useState(false); // flag para limitar envio
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+  const [copySuccess, setCopySuccess] = useState("");
 
   const classesOptions = [
     "OFF TANK", "ARCANO ELEVADO", "ARCANO SILENCE", "MAIN HEALER",
@@ -14,21 +15,8 @@ export default function Home() {
     "DPS - Frost", "DPS - Fire", "DPS - Aguia", "DPS - Xbow"
   ];
 
-  // Verifica ao carregar se já enviou nesta sessão
-  useEffect(() => {
-    if (sessionStorage.getItem("formSubmitted") === "true") {
-      setAlreadySubmitted(true);
-      setMessage("Você já enviou o formulário nesta sessão.");
-    }
-  }, []);
-
   async function handleSubmit(e) {
     e.preventDefault();
-
-    if (alreadySubmitted) {
-      setMessage("Você já enviou o formulário nesta sessão.");
-      return; // bloqueia novo envio
-    }
 
     if (!nome || !classe || !ip) {
       setMessage("Por favor, preencha todos os campos.");
@@ -37,6 +25,8 @@ export default function Home() {
 
     setIsSubmitting(true);
     setMessage("Enviando...");
+    setAlreadySubmitted(false);
+    setCopySuccess("");
 
     try {
       const response = await fetch("/api/submit", {
@@ -51,7 +41,6 @@ export default function Home() {
         setClasse("");
         setIp("");
         setAlreadySubmitted(true);
-        sessionStorage.setItem("formSubmitted", "true"); // marca como enviado
       } else {
         setMessage("Erro ao enviar inscrição.");
       }
@@ -60,6 +49,17 @@ export default function Home() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function copyCommand() {
+    navigator.clipboard.writeText("#forcecityoverload true")
+      .then(() => {
+        setCopySuccess("✅ Comando copiado!");
+        setTimeout(() => setCopySuccess(""), 2000);
+      })
+      .catch(() => {
+        setCopySuccess("❌ Falha ao copiar.");
+      });
   }
 
   return (
@@ -82,6 +82,7 @@ export default function Home() {
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -90,7 +91,6 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
-              disabled={isSubmitting || alreadySubmitted} // bloqueia se já enviou
             />
           </label>
 
@@ -99,6 +99,7 @@ export default function Home() {
             <select
               value={classe}
               onChange={(e) => setClasse(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -107,7 +108,6 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
-              disabled={isSubmitting || alreadySubmitted}
             >
               <option value="">Selecione a classe</option>
               {classesOptions.map((c) => (
@@ -122,6 +122,7 @@ export default function Home() {
               type="text"
               value={ip}
               onChange={(e) => setIp(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -130,27 +131,26 @@ export default function Home() {
                 border: "1px solid #ccc",
                 boxSizing: "border-box"
               }}
-              disabled={isSubmitting || alreadySubmitted}
             />
           </label>
 
           <button
             type="submit"
-            disabled={isSubmitting || alreadySubmitted}
+            disabled={isSubmitting}
             style={{
               marginTop: "16px",
               width: "100%",
               padding: "10px",
-              backgroundColor: (isSubmitting || alreadySubmitted) ? "#aaa" : "#0070f3",
+              backgroundColor: isSubmitting ? "#aaa" : "#0070f3",
               color: "white",
               border: "none",
               borderRadius: "4px",
-              cursor: (isSubmitting || alreadySubmitted) ? "not-allowed" : "pointer",
+              cursor: isSubmitting ? "not-allowed" : "pointer",
               fontWeight: "bold",
               fontSize: "16px"
             }}
           >
-            {alreadySubmitted ? "✅ Inscrição enviada" : (isSubmitting ? "Enviando..." : "Enviar")}
+            {isSubmitting ? "Enviando..." : "Enviar"}
           </button>
         </form>
 
@@ -162,6 +162,29 @@ export default function Home() {
           }}>
             {message}
           </p>
+        )}
+
+        {alreadySubmitted && (
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <p>Copie o comando abaixo e envie no chat do jogo:</p>
+            <button
+              onClick={copyCommand}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#0070f3",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Copiar comando
+            </button>
+            {copySuccess && (
+              <p style={{ marginTop: "8px", color: "green" }}>{copySuccess}</p>
+            )}
+          </div>
         )}
       </div>
 
