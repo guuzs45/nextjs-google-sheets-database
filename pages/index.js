@@ -166,10 +166,24 @@ export default function Home() {
 
         {alreadySubmitted && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <p>Clique no botão abaixe e envie o comando no chat do jogo:</p>
+            <p>Copie o comando abaixo e envie no chat do jogo:</p>
+            <div style={{
+              margin: "10px auto",
+              padding: "12px",
+              backgroundColor: "#f0f0f0",
+              border: "1px solid #ccc",
+              borderRadius: "6px",
+              fontFamily: "monospace",
+              fontSize: "16px",
+              maxWidth: "280px",
+              userSelect: "all"
+            }}>
+              #forcecityoverload true
+            </div>
             <button
               onClick={copyCommand}
               style={{
+                marginTop: "8px",
                 padding: "8px 16px",
                 backgroundColor: "#0070f3",
                 color: "white",
@@ -179,7 +193,7 @@ export default function Home() {
                 fontWeight: "bold",
               }}
             >
-              Copiar comando
+              Copiar Comando
             </button>
             {copySuccess && (
               <p style={{ marginTop: "8px", color: "green" }}>{copySuccess}</p>
