@@ -1,126 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-
-function ClassDropdown({ options, value, onChange, disabled }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const images = {
-    "OFF TANK": "/icons/offtank.png",
-    "ARCANO ELEVADO": "/icons/arcano_elevado.png",
-    "ARCANO SILENCE": "/icons/arcano_silence.png",
-    "MAIN HEALER": "/icons/main_healer.png",
-    "RAIZ FERREA": "/icons/raiz_ferrea.png",
-    "QUEBRAREINOS": "/icons/quebrareinos.png",
-    "INCUBO": "/icons/incubo.png",
-    "BRUXO": "/icons/bruxo.png",
-    "DPS - Frost": "/icons/dps_frost.png",
-    "DPS - Fire": "/icons/dps_fire.png",
-    "DPS - Aguia": "/icons/dps_aguia.png",
-    "DPS - Xbow": "/icons/dps_xbow.png",
-  };
-
-  const selectedOption = options.find((opt) => opt === value);
-
-  return (
-    <div
-      ref={dropdownRef}
-      style={{
-        position: "relative",
-        userSelect: "none",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-        padding: "8px",
-        cursor: disabled ? "not-allowed" : "pointer",
-        backgroundColor: disabled ? "#eee" : "white",
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        maxWidth: "250px",    // largura máxima para dropdown fechado
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-      }}
-      onClick={() => {
-        if (!disabled) setIsOpen(!isOpen);
-      }}
-    >
-      {selectedOption ? (
-        <>
-          <img
-            src={images[selectedOption]}
-            alt={selectedOption}
-            style={{ width: 20, height: 20, objectFit: "contain" }}
-          />
-          <span>{selectedOption}</span>
-        </>
-      ) : (
-        <span style={{ color: "#888" }}>Selecione a classe</span>
-      )}
-
-      {isOpen && (
-        <ul
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            backgroundColor: "white",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            marginTop: 4,
-            maxHeight: 200,
-            overflowY: "auto",
-            zIndex: 1000,
-            listStyle: "none",
-            padding: 0,
-            maxWidth: "250px",  // largura máxima para o menu aberto
-          }}
-        >
-          {options.map((option) => (
-            <li
-              key={option}
-              onClick={() => {
-                onChange(option);
-                setIsOpen(false);
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px",
-                cursor: "pointer",
-                backgroundColor: option === value ? "#0070f3" : "white",
-                color: option === value ? "white" : "black",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#eee")}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  option === value ? "#0070f3" : "white")
-              }
-            >
-              <img
-                src={images[option]}
-                alt={option}
-                style={{ width: 20, height: 20, objectFit: "contain" }}
-              />
-              {option}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
+import { useState } from "react";
 
 export default function Home() {
   const [nome, setNome] = useState("");
@@ -218,12 +96,24 @@ export default function Home() {
 
           <label style={{ display: "block", marginBottom: "8px" }}>
             Classe:
-            <ClassDropdown
-              options={classesOptions}
+            <select
               value={classe}
-              onChange={setClasse}
+              onChange={(e) => setClasse(e.target.value)}
               disabled={isSubmitting}
-            />
+              style={{
+                width: "100%",
+                padding: "8px",
+                marginTop: "4px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+                boxSizing: "border-box"
+              }}
+            >
+              <option value="">Selecione a classe</option>
+              {classesOptions.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </label>
 
           <label style={{ display: "block", marginBottom: "8px" }}>
