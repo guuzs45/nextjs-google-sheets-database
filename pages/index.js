@@ -8,6 +8,7 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [copySuccess, setCopySuccess] = useState("");
+  const [ipError, setIpError] = useState("");
 
   const classesOptions = [
     "OFF TANK", "ARCANO ELEVADO", "ARCANO SILENCE", "MAIN HEALER",
@@ -21,6 +22,13 @@ export default function Home() {
     if (!nome || !classe || !ip) {
       setMessage("Por favor, preencha todos os campos.");
       return;
+    }
+
+    if (!/^\d+$/.test(ip)) {
+      setIpError("O IP deve conter apenas números.");
+      return;
+    } else {
+      setIpError("");
     }
 
     setIsSubmitting(true);
@@ -120,8 +128,19 @@ export default function Home() {
             IP:
             <input
               type="text"
+              inputMode="numeric"
+              pattern="\d*"
               value={ip}
-              onChange={(e) => setIp(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                const onlyNumbers = value.replace(/\D/g, "");
+                setIp(onlyNumbers);
+                if (value !== onlyNumbers) {
+                  setIpError("Digite apenas números.");
+                } else {
+                  setIpError("");
+                }
+              }}
               disabled={isSubmitting}
               style={{
                 width: "100%",
@@ -132,6 +151,9 @@ export default function Home() {
                 boxSizing: "border-box"
               }}
             />
+            {ipError && (
+              <p style={{ color: "red", marginTop: "4px", fontSize: "12px" }}>{ipError}</p>
+            )}
           </label>
 
           <button
