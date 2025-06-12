@@ -141,7 +141,7 @@ export default function Home() {
                 setIp(value);
 
                 if (value && parseInt(value, 10) > 2300) {
-                  setIpError("O IP deve ser no máximo 2300.");
+                  setIpError("O IP digitado supera o limite permitido.");
                 } else {
                   setIpError("");
                 }
