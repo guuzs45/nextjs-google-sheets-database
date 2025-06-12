@@ -27,10 +27,15 @@ export default function Home() {
     if (!/^\d+$/.test(ip)) {
       setIpError("O IP deve conter apenas números.");
       return;
-    } else {
-      setIpError("");
     }
 
+    const ipNumber = parseInt(ip, 10);
+    if (ipNumber > 2300) {
+      setIpError("O IP deve ser no máximo 2300.");
+      return;
+    }
+
+    setIpError("");
     setIsSubmitting(true);
     setMessage("Enviando...");
     setAlreadySubmitted(false);
@@ -132,11 +137,11 @@ export default function Home() {
               pattern="\d*"
               value={ip}
               onChange={(e) => {
-                const value = e.target.value;
-                const onlyNumbers = value.replace(/\D/g, "");
-                setIp(onlyNumbers);
-                if (value !== onlyNumbers) {
-                  setIpError("Digite apenas números.");
+                const value = e.target.value.replace(/\D/g, "");
+                setIp(value);
+
+                if (value && parseInt(value, 10) > 2300) {
+                  setIpError("O IP deve ser no máximo 2300.");
                 } else {
                   setIpError("");
                 }
