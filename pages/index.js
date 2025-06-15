@@ -17,14 +17,13 @@ export default function Home() {
     "DPS - Frost", "DPS - Fire", "DPS - Aguia", "DPS - Xbow"
   ];
 
-  function getIconPath(classeNome) {
-    const fileName = classeNome
+  const getIconPath = (className) => {
+    const formattedName = className
       .toLowerCase()
       .replace(/\s|-/g, "_")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    return `/icons/${fileName}.png`;
-  }
+      .replace(/[^\w_]/g, "");
+    return `/icons/${formattedName}.png`;
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -117,75 +116,83 @@ export default function Home() {
             />
           </label>
 
-          <label style={{ display: "block", marginBottom: "8px" }}>
+          <label style={{ display: "block", marginBottom: "8px", position: "relative" }}>
             Classe:
             <div
-              style={{
-                position: "relative",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                padding: "8px",
-                cursor: "pointer",
-                userSelect: "none",
-                backgroundColor: "#fff"
-              }}
               onClick={() => setDropdownOpen(!dropdownOpen)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                marginTop: "4px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+                boxSizing: "border-box",
+                cursor: "pointer",
+                backgroundColor: "#fff",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px"
+              }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                {classe && (
+              {classe ? (
+                <>
                   <img
                     src={getIconPath(classe)}
                     alt={classe}
                     style={{ width: "20px", height: "20px" }}
                   />
-                )}
-                <span>{classe || "Selecione a classe"}</span>
-              </div>
-              {dropdownOpen && (
-                <ul style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  right: 0,
-                  backgroundColor: "#fff",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  marginTop: "4px",
-                  maxHeight: "200px",
-                  overflowY: "auto",
-                  zIndex: 10,
-                  padding: 0,
-                  listStyle: "none"
-                }}>
-                  {classesOptions.map((option) => (
-                    <li
-                      key={option}
-                      onClick={() => {
-                        setClasse(option);
-                        setDropdownOpen(false);
-                      }}
-                      style={{
-                        padding: "4px 8px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        cursor: "pointer",
-                        borderBottom: "1px solid #eee",
-                        fontSize: "14px",
-                        lineHeight: "1.2"
-                      }}
-                    >
-                      <img
-                        src={getIconPath(option)}
-                        alt={option}
-                        style={{ width: "18px", height: "18px" }}
-                      />
-                      <span>{option}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <span>{classe}</span>
+                </>
+              ) : (
+                <span style={{ color: "#888" }}>Selecione a classe</span>
               )}
             </div>
+
+            {dropdownOpen && (
+              <ul style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                backgroundColor: "#fff",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                marginTop: "4px",
+                maxHeight: "150px",
+                overflowY: "auto",
+                zIndex: 10,
+                padding: 0,
+                listStyle: "none"
+              }}>
+                {classesOptions.map((option) => (
+                  <li
+                    key={option}
+                    onClick={() => {
+                      setClasse(option);
+                      setDropdownOpen(false);
+                    }}
+                    style={{
+                      padding: "2px 6px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid #eee",
+                      fontSize: "12px",
+                      lineHeight: "1.1",
+                      height: "28px"
+                    }}
+                  >
+                    <img
+                      src={getIconPath(option)}
+                      alt={option}
+                      style={{ width: "14px", height: "14px" }}
+                    />
+                    <span>{option}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </label>
 
           <label style={{ display: "block", marginBottom: "8px" }}>
