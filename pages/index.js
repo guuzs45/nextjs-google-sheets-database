@@ -16,6 +16,15 @@ export default function Home() {
     "DPS - Frost", "DPS - Fire", "DPS - Aguia", "DPS - Xbow"
   ];
 
+  function getIconPath(classeNome) {
+    const fileName = classeNome
+      .toLowerCase()
+      .replace(/\s|-/g, "_")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+    return `/icons/${fileName}.png`;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -128,6 +137,17 @@ export default function Home() {
               ))}
             </select>
           </label>
+
+          {/* Exibição do ícone da classe selecionada */}
+          {classe && (
+            <div style={{ textAlign: "center", marginBottom: "10px" }}>
+              <img
+                src={getIconPath(classe)}
+                alt={`Ícone de ${classe}`}
+                style={{ width: "40px", height: "40px" }}
+              />
+            </div>
+          )}
 
           <label style={{ display: "block", marginBottom: "8px" }}>
             IP:
