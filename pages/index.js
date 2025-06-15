@@ -9,6 +9,7 @@ export default function Home() {
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [copySuccess, setCopySuccess] = useState("");
   const [ipError, setIpError] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const classesOptions = [
     "OFF TANK", "ARCANO ELEVADO", "ARCANO SILENCE", "MAIN HEALER",
@@ -21,7 +22,7 @@ export default function Home() {
       .toLowerCase()
       .replace(/\s|-/g, "_")
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+      .replace(/[\u0300-\u036f]/g, "");
     return `/icons/${fileName}.png`;
   }
 
@@ -116,38 +117,70 @@ export default function Home() {
             />
           </label>
 
-          <label style={{ display: "block", marginBottom: "8px" }}>
-            Classe:
-            <select
-              value={classe}
-              onChange={(e) => setClasse(e.target.value)}
-              disabled={isSubmitting}
+          {/* Dropdown personalizado de classes */}
+          <div style={{ marginBottom: "8px" }}>
+            <label>Classe:</label>
+            <div
+              onClick={() => setDropdownOpen(!dropdownOpen)}
               style={{
-                width: "100%",
-                padding: "8px",
                 marginTop: "4px",
+                padding: "8px",
                 borderRadius: "4px",
                 border: "1px solid #ccc",
-                boxSizing: "border-box"
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                backgroundColor: "#fff",
+                userSelect: "none"
               }}
             >
-              <option value="">Selecione a classe</option>
-              {classesOptions.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </label>
-
-          {/* Exibição do ícone da classe selecionada */}
-          {classe && (
-            <div style={{ textAlign: "center", marginBottom: "10px" }}>
-              <img
-                src={getIconPath(classe)}
-                alt={`Ícone de ${classe}`}
-                style={{ width: "40px", height: "40px" }}
-              />
+              {classe ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <img src={getIconPath(classe)} alt={classe} style={{ width: "24px", height: "24px" }} />
+                  <span>{classe}</span>
+                </div>
+              ) : (
+                <span style={{ color: "#888" }}>Selecione a classe</span>
+              )}
+              <span style={{ transform: dropdownOpen ? "rotate(180deg)" : "none" }}>▼</span>
             </div>
-          )}
+
+            {dropdownOpen && (
+              <ul style={{
+                listStyle: "none",
+                padding: "0",
+                margin: "4px 0 0 0",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                maxHeight: "200px",
+                overflowY: "auto",
+                backgroundColor: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+              }}>
+                {classesOptions.map((option) => (
+                  <li
+                    key={option}
+                    onClick={() => {
+                      setClasse(option);
+                      setDropdownOpen(false);
+                    }}
+                    style={{
+                      padding: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid #eee"
+                    }}
+                  >
+                    <img src={getIconPath(option)} alt={option} style={{ width: "24px", height: "24px" }} />
+                    <span>{option}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           <label style={{ display: "block", marginBottom: "8px" }}>
             IP:
