@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 
 export default function Home() {
@@ -17,29 +18,26 @@ export default function Home() {
     "DPS - Frost", "DPS - Fire", "DPS - Aguia", "DPS - Xbow"
   ];
 
-  const getIconPath = (className) => {
-    const formattedName = className
+  function getIconPath(classe) {
+    if (!classe) return "";
+    const sanitized = classe
       .toLowerCase()
-      .replace(/\s|-/g, "_")
-      .replace(/[^\w_]/g, "");
-    return `/icons/${formattedName}.png`;
-  };
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[\s-/]+/g, "_");
+    return `/icons/${sanitized}.png`;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
-
     if (!nome || !classe || !ip) {
       setMessage("Por favor, preencha todos os campos.");
       return;
     }
-
     if (!/^\d+$/.test(ip)) {
       setIpError("O IP deve conter apenas números.");
       return;
     }
-
-    const ipNumber = parseInt(ip, 10);
-    if (ipNumber > 2300) {
+    if (parseInt(ip, 10) > 2300) {
       setIpError("O IP deve ser no máximo 2300.");
       return;
     }
@@ -116,13 +114,13 @@ export default function Home() {
             />
           </label>
 
-          <label style={{ display: "block", marginBottom: "8px", position: "relative" }}>
+          <label style={{ display: "block", marginBottom: "8px" }}>
             Classe:
             <div
               onClick={() => setDropdownOpen(!dropdownOpen)}
               style={{
                 width: "100%",
-                padding: "8px",
+                padding: "4px 6px",
                 marginTop: "4px",
                 borderRadius: "4px",
                 border: "1px solid #ccc",
@@ -131,7 +129,10 @@ export default function Home() {
                 backgroundColor: "#fff",
                 display: "flex",
                 alignItems: "center",
-                gap: "8px"
+                gap: "4px",
+                minHeight: "28px",
+                fontSize: "12px",
+                lineHeight: "1.1"
               }}
             >
               {classe ? (
@@ -139,59 +140,46 @@ export default function Home() {
                   <img
                     src={getIconPath(classe)}
                     alt={classe}
-                    style={{ width: "20px", height: "20px" }}
+                    style={{ width: "14px", height: "14px" }}
                   />
-                  <span>{classe}</span>
+                  {classe}
                 </>
-              ) : (
-                <span style={{ color: "#888" }}>Selecione a classe</span>
-              )}
+              ) : "Selecione a classe"}
             </div>
-
             {dropdownOpen && (
-              <ul style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                backgroundColor: "#fff",
+              <div style={{
                 border: "1px solid #ccc",
                 borderRadius: "4px",
                 marginTop: "4px",
                 maxHeight: "150px",
                 overflowY: "auto",
-                zIndex: 10,
-                padding: 0,
-                listStyle: "none"
+                backgroundColor: "#fff"
               }}>
-                {classesOptions.map((option) => (
-                  <li
-                    key={option}
+                {classesOptions.map((c) => (
+                  <div
+                    key={c}
                     onClick={() => {
-                      setClasse(option);
+                      setClasse(c);
                       setDropdownOpen(false);
                     }}
                     style={{
-                      padding: "2px 6px",
+                      padding: "6px",
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px",
+                      gap: "6px",
                       cursor: "pointer",
-                      borderBottom: "1px solid #eee",
-                      fontSize: "12px",
-                      lineHeight: "1.1",
-                      height: "28px"
+                      fontSize: "12px"
                     }}
                   >
                     <img
-                      src={getIconPath(option)}
-                      alt={option}
+                      src={getIconPath(c)}
+                      alt={c}
                       style={{ width: "14px", height: "14px" }}
                     />
-                    <span>{option}</span>
-                  </li>
+                    {c}
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
           </label>
 
@@ -205,7 +193,6 @@ export default function Home() {
               onChange={(e) => {
                 const value = e.target.value.replace(/\D/g, "");
                 setIp(value);
-
                 if (value && parseInt(value, 10) > 2300) {
                   setIpError("O IP digitado supera o limite permitido.");
                 } else {
